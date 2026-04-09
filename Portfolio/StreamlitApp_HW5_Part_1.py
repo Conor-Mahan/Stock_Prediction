@@ -116,7 +116,7 @@ def display_explanation(input_df, session, aws_bucket):
 
     dataset = pd.read_csv(r'Portfolio/SP500Data.csv',index_col=0)
     random = 'NVDA'
-    random_price = json.loads(request_body)[random]
+    random_price = input_df[random]
     closest_date = (dataset[random] - float(random_price)).abs().idxmin()
 
     return_period = 5
