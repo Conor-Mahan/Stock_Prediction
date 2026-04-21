@@ -73,13 +73,8 @@ MODEL_INFO = {
     "endpoint"  : aws_endpoint,
     "explainer" : "explainer_fraud.shap",
     "pipeline"  : "fine_tuned_pipeline.tar.gz",
-    "keys"      : ['TransactionDT', 'card2', 'addr1', 'dist1'],
-    "inputs"    : [
-        {"name": "TransactionDT", "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 0.01},
-        {"name": "card2",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
-        {"name": "addr1",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
-        {"name": "dist1",          "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 1.0}
-    ]
+    "keys"      : ['TransactionAmt'],
+    "inputs"    : [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TransactionAmt']]
 }
 
 
@@ -191,6 +186,7 @@ if submitted:
     input_df = pd.DataFrame([data_row], columns=MODEL_INFO["keys"])
     print("here")
     print(input_df )
+    st.metric("Prediction Result", input_df)
     
     res, status = call_model_api(input_df)
     if status == 200:
