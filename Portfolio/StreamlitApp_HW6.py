@@ -17,6 +17,7 @@ from sagemaker.deserializers import JSONDeserializer
 from sagemaker.serializers import NumpySerializer
 from sagemaker.deserializers import NumpyDeserializer
 
+
 from sklearn.pipeline import Pipeline
 import shap
 
@@ -34,7 +35,8 @@ project_root = os.path.abspath(os.path.join(current_dir, '..'))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from src.feature_utils import extract_features
+#from src.feature_utils import extract_features
+from src.Custom_Classes import DropHighMissingCols, TransactionFeatureEngineer, DropHighCorrelation
 
 # Access the secrets
 aws_id = st.secrets["aws_credentials"]["AWS_ACCESS_KEY_ID"]
@@ -59,13 +61,28 @@ sm_session = sagemaker.Session(boto_session=session)
 # Data & Model Configuration
 df_features = extract_features()
 
+#MODEL_INFO = {
+#        "endpoint": aws_endpoint,
+#        "explainer": 'explainer_sentiment.shap',
+#        "pipeline": 'finalized_sentiment_model.tar.gz',
+#        "keys": ['TSLA','JPM','ADBE','PredictedSentiment'],
+#        "inputs": [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TSLA','JPM','ADBE','PredictedSentiment']]
+#}
+
 MODEL_INFO = {
-        "endpoint": aws_endpoint,
-        "explainer": 'explainer_sentiment.shap',
-        "pipeline": 'finalized_sentiment_model.tar.gz',
-        "keys": ['TSLA','JPM','ADBE','PredictedSentiment'],
-        "inputs": [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TSLA','JPM','ADBE','PredictedSentiment']]
+    "endpoint"  : aws_endpoint,
+    "explainer" : "explainer_fraud.shap",
+    "pipeline"  : "fine_tuned_pipeline.tar.gz",
+    "keys"      : ['TransactionAmt', 'card1', 'card2', 'addr1', 'dist1'],
+    "inputs"    : [
+        {"name": "TransactionAmt", "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 0.01},
+        {"name": "card1",          "min": 0.0,  "max": 20000.0, "default": 0.0, "step": 1.0},
+        {"name": "card2",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
+        {"name": "addr1",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
+        {"name": "dist1",          "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 1.0}
+    ]
 }
+
 
 def load_pipeline(_session, bucket, key):
     s3_client = _session.client('s3')
@@ -78,7 +95,9 @@ def load_pipeline(_session, bucket, key):
         # Extract the .joblib file from the .tar.gz
     with tarfile.open(filename, "r:gz") as tar:
         tar.extractall(path=".")
-        joblib_file = [f for f in tar.getnames() if f.endswith('.joblib')][0]
+        #joblib_file = [f for f in tar.getnames() if f.endswith('.joblib')][0]
+        joblib_file = [f for f in tar.getnames() if f.endswith('.pkl')][0]
+    
 
     # Load the full pipeline
     return joblib.load(f"{joblib_file}")
@@ -114,7 +133,8 @@ def call_model_api(input_df):
         # For classification
         raw_pred = predictor.predict(input_df)
         pred_val = pd.DataFrame(raw_pred).values[-1][0]
-        mapping = {0: "SELL", 1: "HOLD", 2: "BUY"}
+        #mapping = {0: "SELL", 1: "HOLD", 2: "BUY"}
+        mapping = {0: "Legitimate", 1: "Fraud"}
         return mapping.get(pred_val), 200
     except Exception as e:
         return f"Error: {str(e)}", 500
@@ -134,7 +154,8 @@ def display_explanation(input_df, session, aws_bucket):
     st.subheader("🔍 Decision Transparency (SHAP)")
     fig, ax = plt.subplots(figsize=(10, 4))
     #shap.plots.waterfall(shap_values[0], max_display=10)
-    shap.plots.waterfall(shap_values[0, :, 0]) #classification
+    #shap.plots.waterfall(shap_values[0, :, 0]) #classification
+    shap.plots.waterfall(shap_values[0, :, 1])  # class 1 = fraud
     st.pyplot(fig)
     # top feature 
     #regression
