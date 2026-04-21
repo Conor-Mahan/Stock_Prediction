@@ -73,10 +73,10 @@ MODEL_INFO = {
     "endpoint"  : aws_endpoint,
     "explainer" : "explainer_fraud.shap",
     "pipeline"  : "fine_tuned_pipeline.tar.gz",
-    "keys"      : ['TransactionAmt', 'card1', 'card2', 'addr1', 'dist1'],
+    "keys"      : ['TransactionDT', 'TransactionAmt', 'card2', 'addr1', 'dist1'],
     "inputs"    : [
-        {"name": "TransactionAmt", "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 0.01},
-        {"name": "card1",          "min": 0.0,  "max": 20000.0, "default": 0.0, "step": 1.0},
+        {"name": "TransactionDT", "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 0.01},
+        {"name": "TransactionAmt",          "min": 0.0,  "max": 20000.0, "default": 0.0, "step": 1.0},
         {"name": "card2",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
         {"name": "addr1",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
         {"name": "dist1",          "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 1.0}
