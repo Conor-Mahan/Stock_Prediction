@@ -190,7 +190,9 @@ if submitted:
     # base_df = df_features
     # input_df = pd.concat([base_df, pd.DataFrame([data_row], columns=base_df.columns)])
     input_df = pd.DataFrame([data_row], columns=MODEL_INFO["keys"])
+    print("here")
     print(input_df )
+    st.metric(input_df)
     
     res, status = call_model_api(input_df)
     if status == 200:
