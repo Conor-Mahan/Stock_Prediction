@@ -76,7 +76,6 @@ MODEL_INFO = {
     "keys"      : ['TransactionDT', 'TransactionAmt', 'card2', 'addr1', 'dist1'],
     "inputs"    : [
         {"name": "TransactionDT", "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 0.01},
-        {"name": "TransactionAmt",          "min": 0.0,  "max": 20000.0, "default": 0.0, "step": 1.0},
         {"name": "card2",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
         {"name": "addr1",          "min": 0.0,  "max": 600.0,   "default": 0.0, "step": 1.0},
         {"name": "dist1",          "min": 0.0,  "max": 10000.0, "default": 0.0, "step": 1.0}
@@ -192,7 +191,6 @@ if submitted:
     input_df = pd.DataFrame([data_row], columns=MODEL_INFO["keys"])
     print("here")
     print(input_df )
-    st.metric(input_df)
     
     res, status = call_model_api(input_df)
     if status == 200:
