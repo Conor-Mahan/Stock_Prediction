@@ -126,36 +126,42 @@ sm_session = sagemaker.Session(boto_session=session)
 
  
 
-#MODEL_INFO = {
-
-#        "endpoint": aws_endpoint,
-
-#        "explainer": 'explainer_sentiment.shap',
-
-#        "pipeline": 'finalized_sentiment_model.tar.gz',
-
-#        "keys": ['TSLA','JPM','ADBE','PredictedSentiment'],
-
-#        "inputs": [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TSLA','JPM','ADBE','PredictedSentiment']]
-
-#}
 
  
 
+#MODEL_INFO = {
+#
+#    "endpoint"  : aws_endpoint,
+#
+#    "explainer" : "explainer_fraud.shap",
+#
+#    "pipeline"  : "fine_tuned_pipeline.tar.gz",
+#
+#    "keys"      : ['TransactionAmt','addr1','addr2'],
+#
+#    "inputs"    : [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TransactionAmt','addr1','addr2']]
+#
+#}
+
 MODEL_INFO = {
-
     "endpoint"  : aws_endpoint,
-
     "explainer" : "explainer_fraud.shap",
-
     "pipeline"  : "fine_tuned_pipeline.tar.gz",
-
-    "keys"      : ['TransactionAmt','addr1','addr2'],
-
-    "inputs"    : [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['TransactionAmt','addr1','addr2']]
-
+    "keys"      : [
+        'TransactionAmt', 'ProductCD', 'card1', 'card2', 'card3', 
+        'card4', 'card5', 'card6', 'addr1', 'addr2', 'dist1', 
+        'dist2', 'P_emaildomain', 'R_emaildomain', 'C1', 'C2', 
+        'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 
+        'C12', 'C13', 'C14', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 
+        'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 
+        'D15', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 
+        'M9', 'TransactionDT'
+    ],
+    "inputs"    : [
+        {"name": "TransactionAmt",   "min": 0.0,    "max": 10000.0, "default": 100.0,  "step": 0.01},
+        {"name": "TransactionDT",    "min": 0.0,    "max": 15811131.0, "default": 0.0, "step": 1.0},
+    ]
 }
-
  
 
  
