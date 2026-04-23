@@ -374,10 +374,31 @@ if submitted:
     full_row = {col: 0 for col in MODEL_INFO["keys"]}
     full_row.update(user_inputs)
     
-    # Convert all values to native Python types
-    full_row = {k: float(v) for k, v in full_row.items()}
-    
-    # Send as list of dict directly — skip DataFrame entirely
+    # Set categorical columns to their default string values
+    cat_defaults = {
+        'ProductCD'     : 'W',
+        'card4'         : 'visa',
+        'card6'         : 'debit',
+        'P_emaildomain' : 'gmail.com',
+        'R_emaildomain' : 'gmail.com',
+        'M4'            : 'M0',
+        'M6'            : 'F',
+        'M1'            : 'T',
+        'M2'            : 'T',
+        'M3'            : 'T',
+        'M5'            : 'T',
+        'M7'            : 'T',
+        'M8'            : 'T',
+        'M9'            : 'T',
+    }
+    full_row.update(cat_defaults)
+
+    # Convert numeric values to float but leave strings alone
+    full_row = {
+        k: (float(v) if not isinstance(v, str) else v) 
+        for k, v in full_row.items()
+    }
+
     input_data = [full_row]
 
     res, status = call_model_api(input_data)
