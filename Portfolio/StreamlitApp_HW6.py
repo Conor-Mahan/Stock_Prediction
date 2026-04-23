@@ -229,6 +229,8 @@ def load_shap_explainer(_session, bucket, key, local_path):
 # Prediction Logic
 
 def call_model_api(input_df):
+    print(f"Type received: {type(input_df)}")
+    print(f"Value: {input_df}")
     predictor = Predictor(
         endpoint_name=MODEL_INFO["endpoint"],
         sagemaker_session=sm_session,
