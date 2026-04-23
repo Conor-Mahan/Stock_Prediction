@@ -262,8 +262,8 @@ def call_model_api(input_data):
     )
     try:
         raw_pred = predictor.predict(input_data)
-        print(f"Raw prediction type: {type(raw_pred)}")
-        print(f"Raw prediction value: {raw_pred}")
+        print(f"Type: {type(raw_pred)}")
+        print(f"Value: {raw_pred}")
         if isinstance(raw_pred, dict):
             if 'prediction' in raw_pred:
                 pred_val = int(raw_pred['prediction'][0])
