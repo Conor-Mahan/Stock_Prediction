@@ -265,7 +265,9 @@ def call_model_api(input_data):
         print(f"Raw prediction: {raw_pred}")
         if isinstance(raw_pred, dict):
             pred_val = raw_pred['prediction'][0]
-        elif isinstance(raw_pred, (list, np.ndarray)):
+        elif isinstance(raw_pred, np.ndarray):
+            pred_val = int(raw_pred.flat[0])
+        elif isinstance(raw_pred, list):
             pred_val = int(raw_pred[0])
         else:
             pred_val = int(raw_pred)
