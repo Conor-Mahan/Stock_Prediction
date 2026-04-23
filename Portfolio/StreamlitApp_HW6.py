@@ -262,9 +262,15 @@ def call_model_api(input_data):
     )
     try:
         raw_pred = predictor.predict(input_data)
-        print(f"Raw prediction: {raw_pred}")
+        print(f"Raw prediction type: {type(raw_pred)}")
+        print(f"Raw prediction value: {raw_pred}")
         if isinstance(raw_pred, dict):
-            pred_val = raw_pred['prediction'][0]
+            if 'prediction' in raw_pred:
+                pred_val = int(raw_pred['prediction'][0])
+            elif 'predictions' in raw_pred:
+                pred_val = int(raw_pred['predictions'][0])
+            else:
+                pred_val = int(list(raw_pred.values())[0])
         elif isinstance(raw_pred, np.ndarray):
             pred_val = int(raw_pred.flat[0])
         elif isinstance(raw_pred, list):
