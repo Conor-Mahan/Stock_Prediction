@@ -228,35 +228,50 @@ def load_shap_explainer(_session, bucket, key, local_path):
 
 # Prediction Logic
 
-def call_model_api(input_df):
-    print(f"Type received: {type(input_df)}")
-    print(f"Value: {input_df}")
-    predictor = Predictor(
-        endpoint_name=MODEL_INFO["endpoint"],
-        sagemaker_session=sm_session,
-        serializer=JSONSerializer(),
-        deserializer=NumpyDeserializer()
-    )
-    try:
+#def call_model_api(input_df):
+#    print(f"Type received: {type(input_df)}")
+#    print(f"Value: {input_df}")
+#    predictor = Predictor(
+#        endpoint_name=MODEL_INFO["endpoint"],
+#        sagemaker_session=sm_session,
+#        serializer=JSONSerializer(),
+#        deserializer=NumpyDeserializer()
+#    )
+#    try:
         #if you do option 1 you want to uncomment the ones you want to use and comment the ones you dont use
         # For regression
         # raw_pred = predictor.predict(input_df)
         # pred_val = pd.DataFrame(raw_pred).values[-1][0]
         # return round(float(pred_val), 4), 200
         # For classification
-        if isinstance(input_df, pd.DataFrame): #this whole if else statement is from claude can be taken out
-            input_data = input_df.to_dict(orient='records')
-        else:
-            input_data = input_df
-        raw_pred = predictor.predict(input_df)
+#        if isinstance(input_df, pd.DataFrame): #this whole if else statement is from claude can be taken out
+#            input_data = input_df.to_dict(orient='records')
+#        else:
+#            input_data = input_df
+#        raw_pred = predictor.predict(input_df)
+#        pred_val = pd.DataFrame(raw_pred).values[-1][0]
+#        #mapping = {0: "SELL", 1: "HOLD", 2: "BUY"}
+#        mapping = {0: "Legitimate", 1: "Fraud"}
+#        return mapping.get(pred_val), 200
+#    except Exception as e:
+#        return f"Error: {str(e)}", 500
+
+def call_model_api(input_data):
+    predictor = Predictor(
+        endpoint_name     = MODEL_INFO["endpoint"],
+        sagemaker_session = sm_session,
+        serializer        = JSONSerializer(),
+        deserializer      = NumpyDeserializer()
+    )
+    try:
+        raw_pred = predictor.predict(input_data)
         pred_val = pd.DataFrame(raw_pred).values[-1][0]
-        #mapping = {0: "SELL", 1: "HOLD", 2: "BUY"}
-        mapping = {0: "Legitimate", 1: "Fraud"}
+        mapping  = {0: "Legitimate", 1: "Fraud"}
         return mapping.get(pred_val), 200
     except Exception as e:
         return f"Error: {str(e)}", 500
 
- 
+
 
 # Local Explainability
 
@@ -359,11 +374,15 @@ if submitted:
     full_row = {col: 0 for col in MODEL_INFO["keys"]}
     full_row.update(user_inputs)
     
-    input_df = pd.DataFrame([full_row], columns=MODEL_INFO["keys"])
+    # Convert all values to native Python types
+    full_row = {k: float(v) for k, v in full_row.items()}
+    
+    # Send as list of dict directly — skip DataFrame entirely
+    input_data = [full_row]
 
-    res, status = call_model_api(input_df)
+    res, status = call_model_api(input_data)
     if status == 200:
         st.metric("Prediction Result", res)
-        display_explanation(input_df, session, aws_bucket)
+        display_explanation(pd.DataFrame(input_data), session, aws_bucket)
     else:
         st.error(res)
