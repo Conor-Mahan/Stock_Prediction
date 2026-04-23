@@ -306,11 +306,23 @@ def display_explanation(input_df, session, aws_bucket):
     preprocessing_pipeline = Pipeline(steps=best_pipeline.steps[:-3])
     input_df_transformed   = preprocessing_pipeline.transform(input_df)
 
-    # Get feature names
-    try:
-        feature_names = preprocessing_pipeline[-1].get_feature_names_out()
-    except:
-        feature_names = [f"Feature {i}" for i in range(input_df_transformed.shape[1])]
+    # Get real feature names by applying each mask in order
+    variance       = best_pipeline.named_steps['variance']
+    kbest          = best_pipeline.named_steps['kbest']
+    drop_collinear = best_pipeline.named_steps['drop_collinear']
+
+    # Start with column names after feature engineering
+    sample        = best_pipeline.named_steps['drop_missing'].transform(input_df)
+    sample        = best_pipeline.named_steps['feature_engineering'].transform(sample)
+    feature_names = np.array(sample.columns.tolist())
+
+    # Apply each mask in order
+    feature_names = feature_names[variance.get_support()]
+    feature_names = feature_names[kbest.get_support()]
+    feature_names = np.array([
+        col for col in feature_names
+        if col not in drop_collinear.cols_to_drop_
+    ])
 
     input_df_transformed = pd.DataFrame(input_df_transformed, columns=feature_names)
     shap_values = explainer(input_df_transformed)
@@ -321,7 +333,7 @@ def display_explanation(input_df, session, aws_bucket):
     st.pyplot(fig)
 
     top_feature = pd.Series(
-        shap_values[0, :, 1].values, 
+        shap_values[0, :, 1].values,
         index=shap_values[0, :, 1].feature_names
     ).abs().idxmax()
     st.info(f"**Business Insight:** The most influential factor in this decision was **{top_feature}**.")
