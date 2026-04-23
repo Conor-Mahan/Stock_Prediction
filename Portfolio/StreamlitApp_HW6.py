@@ -229,49 +229,29 @@ def load_shap_explainer(_session, bucket, key, local_path):
 # Prediction Logic
 
 def call_model_api(input_df):
-
- 
-
     predictor = Predictor(
-
         endpoint_name=MODEL_INFO["endpoint"],
-
         sagemaker_session=sm_session,
-
         serializer=JSONSerializer(),
-
         deserializer=NumpyDeserializer()
-
     )
-
- 
-
     try:
-
         #if you do option 1 you want to uncomment the ones you want to use and comment the ones you dont use
-
         # For regression
-
         # raw_pred = predictor.predict(input_df)
-
         # pred_val = pd.DataFrame(raw_pred).values[-1][0]
-
         # return round(float(pred_val), 4), 200
-
         # For classification
-
+        if isinstance(input_df, pd.DataFrame): #this whole if else statement is from claude can be taken out
+            input_data = input_df.to_dict(orient='records')
+        else:
+            input_data = input_df
         raw_pred = predictor.predict(input_df)
-
         pred_val = pd.DataFrame(raw_pred).values[-1][0]
-
         #mapping = {0: "SELL", 1: "HOLD", 2: "BUY"}
-
         mapping = {0: "Legitimate", 1: "Fraud"}
-
         return mapping.get(pred_val), 200
-
     except Exception as e:
-
         return f"Error: {str(e)}", 500
 
  
