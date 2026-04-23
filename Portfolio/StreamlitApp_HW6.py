@@ -336,10 +336,10 @@ with st.form("pred_form"):
     user_inputs = {}
 
     for i, inp in enumerate(MODEL_INFO["inputs"]):
-    with cols[i % 2]:
-        user_inputs[inp['name']] = st.number_input(
-            inp.get('label', inp['name']),    # ← uses label if it exists, falls back to name
-            min_value=inp['min'], max_value=inp['max'], value=inp['default'], step=inp['step']
+        with cols[i % 2]:
+            user_inputs[inp['name']] = st.number_input(
+                inp.get('label', inp['name']),
+                min_value=inp['min'], max_value=inp['max'], value=inp['default'], step=inp['step']
         )
 
 
