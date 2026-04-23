@@ -364,18 +364,24 @@ with st.form("pred_form"):
 
  
 
+#if submitted:
+##    res, status = call_model_api([user_inputs])
+#    if status == 200:
+#        st.metric("Prediction Result", res)
+#        display_explanation([user_inputs],session, aws_bucket)
+#    else:
+#        st.error(res)
+
 if submitted:
+    # Fill in user inputs then set all missing columns to 0
+    full_row = {col: 0 for col in MODEL_INFO["keys"]}
+    full_row.update(user_inputs)
+    
+    input_df = pd.DataFrame([full_row], columns=MODEL_INFO["keys"])
 
- 
-
-    res, status = call_model_api([user_inputs])
-
+    res, status = call_model_api(input_df)
     if status == 200:
-
         st.metric("Prediction Result", res)
-
-        display_explanation([user_inputs],session, aws_bucket)
-
+        display_explanation(input_df, session, aws_bucket)
     else:
-
         st.error(res)
