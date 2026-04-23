@@ -262,8 +262,14 @@ def call_model_api(input_data):
     )
     try:
         raw_pred = predictor.predict(input_data)
-        pred_val = pd.DataFrame(raw_pred).values[-1][0]
-        mapping  = {0: "Legitimate", 1: "Fraud"}
+        print(f"Raw prediction: {raw_pred}")
+        if isinstance(raw_pred, dict):
+            pred_val = raw_pred['prediction'][0]
+        elif isinstance(raw_pred, (list, np.ndarray)):
+            pred_val = int(raw_pred[0])
+        else:
+            pred_val = int(raw_pred)
+        mapping = {0: "Legitimate", 1: "Fraud"}
         return mapping.get(pred_val), 200
     except Exception as e:
         return f"Error: {str(e)}", 500
